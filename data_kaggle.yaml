@@ -1,0 +1,11 @@
+names:
+- bag
+- banana_peel
+- bottle
+- can
+- eggshell
+- leaves
+nc: 6
+test: /kaggle/temp/Final_Dataset/images/test
+train: /kaggle/temp/Final_Dataset/images/train
+val: /kaggle/temp/Final_Dataset/images/valid

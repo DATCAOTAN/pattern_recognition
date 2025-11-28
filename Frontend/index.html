@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSort AI - Powered by YOLOv8</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-recycle"></i>
+            <span>EcoSort AI - Powered by YOLOv8 (best.pt)</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active" data-page="home">Home</a>
+            <a href="#" data-page="dashboard">Dashboard</a>
+            <a href="#" data-page="hemat-sorting">Hemat Sorting</a>
+            <a href="#" data-page="analytics">Analytics</a>
+            <a href="#" onclick="logout()">See out</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Left Panel - Control & Input -->
+        <aside class="left-panel">
+            <div class="panel-section">
+                <h3>Control & Input</h3>
+                
+                <!-- Model Status -->
+                <div class="status-card">
+                    <div class="status-label">Model Status:</div>
+                    <div class="status-value" id="modelStatus">
+                        <span class="status-indicator loading"></span>
+                        Loading...
+                    </div>
+                </div>
+
+                <!-- Source Selection -->
+                <div class="input-group">
+                    <label>Source: Upload/Camera</label>
+                    <select id="sourceSelect" onchange="changeSource()">
+                        <option value="upload">Upload/Camera</option>
+                        <option value="image">Upload Image</option>
+                        <option value="video">Upload Video</option>
+                        <option value="camera">Live Camera</option>
+                    </select>
+                </div>
+
+                <!-- Camera Preview -->
+                <div class="camera-preview" id="cameraPreview">
+                    <video id="videoElement" autoplay playsinline></video>
+                    <canvas id="cameraCanvas" style="display: none;"></canvas>
+                    <div class="camera-placeholder" id="cameraPlaceholder">
+                        <i class="fas fa-video"></i>
+                        <span>Camera Preview</span>
+                    </div>
+                </div>
+
+                <!-- File Upload -->
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept="image/*,video/*" onchange="handleFileUpload(event)">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Click or drag file here</span>
+                    </div>
+                </div>
+
+                <!-- Confidence Slider -->
+                <div class="input-group">
+                    <label>Confidence: <span id="confidenceValue">0.75</span></label>
+                    <input type="range" id="confidenceSlider" min="0" max="100" value="75" 
+                           oninput="updateConfidence(this.value)">
+                    <div class="slider-labels">
+                        <span>0</span>
+                        <span>ZR6</span>
+                    </div>
+                </div>
+
+                <!-- Start Classification Button -->
+                <button class="btn-primary" id="startBtn" onclick="startClassification()">
+                    <i class="fas fa-play"></i> Start Classification
+                </button>
+
+                <!-- Stop Button (hidden by default) -->
+                <button class="btn-danger" id="stopBtn" onclick="stopClassification()" style="display: none;">
+                    <i class="fas fa-stop"></i> Stop Classification
+                </button>
+            </div>
+
+            <!-- Class Filter -->
+            <div class="panel-section">
+                <h4>Class Filter</h4>
+                <div class="class-filters">
+                    <label class="checkbox-label">
+                        <input type="checkbox" checked data-class="bottle" onchange="updateClassFilter()">
+                        <span class="checkmark inorganic"></span> Bottle
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" checked data-class="can" onchange="updateClassFilter()">
+                        <span class="checkmark inorganic"></span> Can
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" checked data-class="bag" onchange="updateClassFilter()">
+                        <span class="checkmark inorganic"></span> Bag
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" checked data-class="banana_peel" onchange="updateClassFilter()">
+                        <span class="checkmark organic"></span> Banana Peel
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" checked data-class="eggshell" onchange="updateClassFilter()">
+                        <span class="checkmark organic"></span> Eggshell
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" checked data-class="leaves" onchange="updateClassFilter()">
+                        <span class="checkmark organic"></span> Leaves
+                    </label>
+                </div>
+            </div>
+
+            <!-- Snapshot Button -->
+            <div class="panel-section">
+                <button class="btn-secondary" onclick="takeSnapshot()">
+                    <i class="fas fa-camera"></i> Snapshot
+                </button>
+            </div>
+        </aside>
+
+        <!-- Center - Live Analysis View -->
+        <section class="center-panel">
+            <h3>Live Analysis View</h3>
+            
+            <!-- Sorting Decision Display -->
+            <div class="sorting-decision" id="sortingDecisionTop">
+                <span class="decision-text">Sorting Decision: WAITING</span>
+            </div>
+
+            <!-- Main Detection Display -->
+            <div class="detection-display">
+                <img id="detectionImage" src="" alt="Detection View">
+                <canvas id="detectionCanvas"></canvas>
+                <div class="placeholder-view" id="placeholderView">
+                    <i class="fas fa-image"></i>
+                    <p>Upload an image or start camera to begin detection</p>
+                </div>
+            </div>
+
+            <!-- Bottom Sorting Decision -->
+            <div class="sorting-decision bottom" id="sortingDecisionBottom">
+                <span class="decision-text">Sorting Decision: SEPARATE STREAMS</span>
+            </div>
+        </section>
+
+        <!-- Right Panel - Analytics & Logs -->
+        <aside class="right-panel">
+            <h3>Real-time Analytics & Logs</h3>
+
+            <!-- Session Stats -->
+            <div class="panel-section">
+                <h4>Current Session Stats</h4>
+                <div class="stats-chart">
+                    <canvas id="statsChart"></canvas>
+                </div>
+                <div class="stats-numbers">
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalItems">0</span>
+                        <span class="stat-label">Total Items</span>
+                    </div>
+                    <div class="stat-item inorganic">
+                        <span class="stat-value" id="inorganicCount">0</span>
+                        <span class="stat-label">Inorganic</span>
+                    </div>
+                    <div class="stat-item organic">
+                        <span class="stat-value" id="organicCount">0</span>
+                        <span class="stat-label">Organic</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Material Breakdown -->
+            <div class="panel-section">
+                <h4>Material Breakdown</h4>
+                <div class="pie-chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item"><span class="dot inorganic"></span> Inorganic</div>
+                    <div class="legend-item"><span class="dot organic"></span> Organic</div>
+                    <div class="legend-item"><span class="dot material"></span> Material</div>
+                    <div class="legend-item"><span class="dot other"></span> 6 classes</div>
+                </div>
+            </div>
+
+            <!-- Detection Log -->
+            <div class="panel-section logs-section">
+                <div class="section-header">
+                    <h4>Detection Log</h4>
+                    <button class="btn-icon" onclick="exportLogs()">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+                <div class="search-bar">
+                    <input type="text" id="logSearch" placeholder="Search logs..." oninput="filterLogs()">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="log-table" id="logTable">
+                    <!-- Logs will be inserted here -->
+                    <div class="log-placeholder">No detections yet</div>
+                </div>
+            </div>
+
+            <!-- Signal Indicators -->
+            <div class="panel-section">
+                <h4>Sorting Signal</h4>
+                <div class="signal-indicators">
+                    <div class="signal-light green" id="signalGreen">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>INORGANIC</span>
+                    </div>
+                    <div class="signal-light red" id="signalRed">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>ORGANIC</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Footer Status Bar -->
+    <footer class="status-bar">
+        <div class="status-item">
+            <span class="status-dot" id="healthDot"></span>
+            <span>System Health: <span id="systemHealth">Checking...</span></span>
+        </div>
+        <div class="status-item">
+            <span>Model Path: <span id="modelPath">/models/best.pt</span></span>
+        </div>
+        <div class="status-item">
+            <span>GPU Usage: <span id="gpuUsage">--</span>%</span>
+        </div>
+    </footer>
+
+    <!-- Export Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <h3>Export Logs</h3>
+            <div class="export-options">
+                <button class="btn-export" onclick="downloadCSV()">
+                    <i class="fas fa-file-csv"></i> Export CSV
+                </button>
+                <button class="btn-export" onclick="downloadExcel()">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+            </div>
+            <button class="btn-close" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

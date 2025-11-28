@@ -1,0 +1,17 @@
+ID,Timestamp,Class,Category,Confidence
+1,2025-11-28 20:23:32,bottle,Inorganic,0.83
+2,2025-11-28 20:24:34,bag,Inorganic,0.87
+3,2025-11-28 20:25:00,leaves,Organic,0.87
+4,2025-11-28 20:25:26,bag,Inorganic,0.74
+5,2025-11-28 20:26:14,eggshell,Organic,0.9
+6,2025-11-28 20:28:26,bag,Inorganic,0.82
+7,2025-11-28 20:29:03,bottle,Inorganic,0.95
+8,2025-11-28 20:29:03,bottle,Inorganic,0.94
+9,2025-11-28 20:29:29,leaves,Organic,0.93
+10,2025-11-28 20:29:29,leaves,Organic,0.93
+11,2025-11-28 20:29:29,leaves,Organic,0.64
+12,2025-11-28 20:30:37,bag,Inorganic,0.78
+13,2025-11-28 20:30:56,can,Inorganic,0.94
+14,2025-11-28 20:31:16,leaves,Organic,0.95
+15,2025-11-28 20:31:16,leaves,Organic,0.93
+16,2025-11-28 20:31:34,eggshell,Organic,0.9
