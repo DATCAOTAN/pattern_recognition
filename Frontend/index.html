@@ -92,33 +92,21 @@
                 </button>
             </div>
 
-            <!-- Class Filter -->
+            <!-- Category Filter -->
             <div class="panel-section">
-                <h4>Class Filter</h4>
-                <div class="class-filters">
+                <h4>Category Filter</h4>
+                <div class="category-filters">
                     <label class="checkbox-label">
-                        <input type="checkbox" checked data-class="bottle" onchange="updateClassFilter()">
-                        <span class="checkmark inorganic"></span> Bottle
+                        <input type="checkbox" checked data-category="organic" onchange="updateCategoryFilter()">
+                        <span class="checkmark organic"></span> Organic (Hữu cơ)
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" checked data-class="can" onchange="updateClassFilter()">
-                        <span class="checkmark inorganic"></span> Can
+                        <input type="checkbox" checked data-category="inorganic" onchange="updateCategoryFilter()">
+                        <span class="checkmark inorganic"></span> Inorganic (Vô cơ)
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" checked data-class="bag" onchange="updateClassFilter()">
-                        <span class="checkmark inorganic"></span> Bag
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" checked data-class="banana_peel" onchange="updateClassFilter()">
-                        <span class="checkmark organic"></span> Banana Peel
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" checked data-class="eggshell" onchange="updateClassFilter()">
-                        <span class="checkmark organic"></span> Eggshell
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" checked data-class="leaves" onchange="updateClassFilter()">
-                        <span class="checkmark organic"></span> Leaves
+                        <input type="checkbox" checked data-category="recyclable" onchange="updateCategoryFilter()">
+                        <span class="checkmark recyclable"></span> Recyclable (Tái chế)
                     </label>
                 </div>
             </div>
@@ -171,28 +159,31 @@
                         <span class="stat-value" id="totalItems">0</span>
                         <span class="stat-label">Total Items</span>
                     </div>
+                    <div class="stat-item organic">
+                        <span class="stat-value" id="organicCount">0</span>
+                        <span class="stat-label">Organic</span>
+                    </div>
                     <div class="stat-item inorganic">
                         <span class="stat-value" id="inorganicCount">0</span>
                         <span class="stat-label">Inorganic</span>
                     </div>
-                    <div class="stat-item organic">
-                        <span class="stat-value" id="organicCount">0</span>
-                        <span class="stat-label">Organic</span>
+                    <div class="stat-item recyclable">
+                        <span class="stat-value" id="recyclableCount">0</span>
+                        <span class="stat-label">Recyclable</span>
                     </div>
                 </div>
             </div>
 
             <!-- Material Breakdown -->
             <div class="panel-section">
-                <h4>Material Breakdown</h4>
+                <h4>Category Breakdown</h4>
                 <div class="pie-chart-container">
                     <canvas id="pieChart"></canvas>
                 </div>
                 <div class="legend">
-                    <div class="legend-item"><span class="dot inorganic"></span> Inorganic</div>
-                    <div class="legend-item"><span class="dot organic"></span> Organic</div>
-                    <div class="legend-item"><span class="dot material"></span> Material</div>
-                    <div class="legend-item"><span class="dot other"></span> 6 classes</div>
+                    <div class="legend-item"><span class="dot organic"></span> Organic (Hữu cơ)</div>
+                    <div class="legend-item"><span class="dot inorganic"></span> Inorganic (Vô cơ)</div>
+                    <div class="legend-item"><span class="dot recyclable"></span> Recyclable (Tái chế)</div>
                 </div>
             </div>
 
@@ -218,13 +209,17 @@
             <div class="panel-section">
                 <h4>Sorting Signal</h4>
                 <div class="signal-indicators">
-                    <div class="signal-light green" id="signalGreen">
-                        <i class="fas fa-arrow-left"></i>
+                    <div class="signal-light red" id="signalOrganic">
+                        <i class="fas fa-apple-alt"></i>
+                        <span>ORGANIC</span>
+                    </div>
+                    <div class="signal-light green" id="signalInorganic">
+                        <i class="fas fa-trash"></i>
                         <span>INORGANIC</span>
                     </div>
-                    <div class="signal-light red" id="signalRed">
-                        <i class="fas fa-arrow-right"></i>
-                        <span>ORGANIC</span>
+                    <div class="signal-light blue" id="signalRecyclable">
+                        <i class="fas fa-recycle"></i>
+                        <span>RECYCLABLE</span>
                     </div>
                 </div>
             </div>

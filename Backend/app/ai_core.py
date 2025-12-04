@@ -10,8 +10,9 @@ import torch
 
 from .config import (
     MODEL_PATH, FALLBACK_MODEL_PATH, CLASS_NAMES,
-    INORGANIC_CLASSES, ORGANIC_CLASSES, CONFIDENCE_THRESHOLD,
-    IOU_THRESHOLD, IMG_SIZE, COLORS, WEB_COLORS
+    INORGANIC_CLASSES, ORGANIC_CLASSES, RECYCLABLE_CLASSES,
+    CONFIDENCE_THRESHOLD, IOU_THRESHOLD, IMG_SIZE, COLORS, WEB_COLORS,
+    get_category
 )
 
 
@@ -95,16 +96,9 @@ class AICore:
                 # Get class name
                 class_name = CLASS_NAMES.get(class_id, f"class_{class_id}")
                 
-                # Determine category
-                if class_name in INORGANIC_CLASSES:
-                    category = "Inorganic"
-                    color = WEB_COLORS["inorganic"]
-                elif class_name in ORGANIC_CLASSES:
-                    category = "Organic"
-                    color = WEB_COLORS["organic"]
-                else:
-                    category = "Unknown"
-                    color = "#FFFFFF"
+                # Determine category using get_category function
+                category = get_category(class_name)
+                color = WEB_COLORS.get(category, "#FFFFFF")
                 
                 detection = {
                     "id": i,
@@ -117,7 +111,7 @@ class AICore:
                     "class_id": class_id,
                     "class_name": class_name,
                     "confidence": round(confidence, 2),
-                    "category": category,
+                    "category": category.capitalize(),  # "Organic", "Inorganic", "Recyclable"
                     "color": color
                 }
                 detections.append(detection)
@@ -145,17 +139,15 @@ class AICore:
             bbox = det["bbox"]
             x1, y1, x2, y2 = bbox["x1"], bbox["y1"], bbox["x2"], bbox["y2"]
             
-            # Get color based on category
-            if det["category"] == "Inorganic":
-                color = COLORS["inorganic"]
-            else:
-                color = COLORS["organic"]
+            # Get color based on category (Organic, Inorganic, Recyclable)
+            category_lower = det["category"].lower()
+            color = COLORS.get(category_lower, (255, 255, 255))
             
             # Draw bounding box
             cv2.rectangle(img_copy, (x1, y1), (x2, y2), color, 2)
             
             # Create label text
-            label = f"{det['class_name'].replace('_', ' ').title()} ({det['category']}) {int(det['confidence']*100)}%"
+            label = f"{det['class_name'].replace('_', ' ').replace('-', ' ').title()} ({det['category']}) {int(det['confidence']*100)}%"
             
             # Calculate label background
             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -176,29 +168,39 @@ class AICore:
         Determine sorting decision based on detections
         
         Returns:
-            Sorting decision with signal info
+            Sorting decision with signal info for 3 categories:
+            - RED: Organic (hữu cơ)
+            - GREEN: Inorganic (vô cơ)
+            - BLUE: Recyclable (tái chế)
         """
-        inorganic_count = sum(1 for d in detections if d["category"] == "Inorganic")
         organic_count = sum(1 for d in detections if d["category"] == "Organic")
+        inorganic_count = sum(1 for d in detections if d["category"] == "Inorganic")
+        recyclable_count = sum(1 for d in detections if d["category"] == "Recyclable")
         
         if len(detections) == 0:
             decision = "NO_DETECTION"
             signal = "IDLE"
-        elif inorganic_count > 0 and organic_count > 0:
+        elif (organic_count > 0 and inorganic_count > 0) or \
+             (organic_count > 0 and recyclable_count > 0) or \
+             (inorganic_count > 0 and recyclable_count > 0):
             decision = "SEPARATE_STREAMS"
             signal = "MIXED"
+        elif organic_count > 0:
+            decision = "ORGANIC_STREAM"
+            signal = "RED"  # Red/Orange for organic
         elif inorganic_count > 0:
             decision = "INORGANIC_STREAM"
-            signal = "GREEN"
+            signal = "GREEN"  # Green for inorganic
         else:
-            decision = "ORGANIC_STREAM"
-            signal = "RED"
+            decision = "RECYCLABLE_STREAM"
+            signal = "BLUE"  # Blue for recyclable
             
         return {
             "decision": decision,
             "signal": signal,
-            "inorganic_count": inorganic_count,
             "organic_count": organic_count,
+            "inorganic_count": inorganic_count,
+            "recyclable_count": recyclable_count,
             "total_count": len(detections)
         }
 

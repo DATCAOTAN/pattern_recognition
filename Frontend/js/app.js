@@ -2,23 +2,47 @@
  * EcoSort AI - Main JavaScript Application
  * Waste Classification System with YOLO
  * Full features: Image, Video, Camera processing
+ * 39 Classes - 3 Categories: Organic, Inorganic, Recyclable
  */
 
 // ============== Configuration ==============
 const API_BASE_URL = 'http://localhost:8000';
 
+// ============== 39 Classes Mapping ==============
+const CLASS_NAMES = {
+    // Organic (0-31)
+    0: "Apple", 1: "Apple-core", 2: "Apple-peel", 3: "Bone", 4: "Bone-fish",
+    5: "Bread", 6: "Bun", 7: "Egg-hard", 8: "Egg-scramble", 9: "Egg-shell",
+    10: "Egg-steam", 11: "Egg-yolk", 12: "Fish", 13: "Meat", 14: "Mussel",
+    15: "Mussel-shell", 16: "Noodle", 17: "Orange", 18: "Orange-peel",
+    19: "Other-waste", 20: "Pancake", 21: "Pasta", 22: "Pear", 23: "Pear-core",
+    24: "Pear-peel", 25: "Potato", 26: "Rice", 27: "Shrimp", 28: "Shrimp-shell",
+    29: "Tofu", 30: "Tomato", 31: "Vegetable",
+    // Inorganic (32-33)
+    32: "plastic_bag", 33: "styrofoam",
+    // Recyclable (34-38)
+    34: "Cardboard", 35: "Glass", 36: "Metal", 37: "Paper", 38: "Plastic"
+};
+
+// Category colors
+const CATEGORY_COLORS = {
+    organic: '#FF6600',     // Orange
+    inorganic: '#808080',   // Gray
+    recyclable: '#00FF00'   // Green
+};
+
 // ============== Global State ==============
 let isProcessing = false;
 let currentSource = 'upload';
 let confidenceThreshold = 0.75;
-let classFilters = {
-    bottle: true,
-    can: true,
-    bag: true,
-    banana_peel: true,
-    eggshell: true,
-    leaves: true
+
+// Category filters (3 main categories)
+let categoryFilters = {
+    organic: true,
+    inorganic: true,
+    recyclable: true
 };
+
 let detectionLogs = [];
 let statsChart = null;
 let pieChart = null;
@@ -29,16 +53,9 @@ let uploadedVideo = null;
 // Statistics
 let stats = {
     total: 0,
-    inorganic: 0,
     organic: 0,
-    byClass: {
-        bottle: 0,
-        can: 0,
-        bag: 0,
-        banana_peel: 0,
-        eggshell: 0,
-        leaves: 0
-    }
+    inorganic: 0,
+    recyclable: 0
 };
 
 // ==================== INITIALIZATION ====================
@@ -52,15 +69,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeCharts() {
-    // Bar Chart for Session Stats
+    // Bar Chart for Session Stats (3 categories)
     const statsCtx = document.getElementById('statsChart').getContext('2d');
     statsChart = new Chart(statsCtx, {
         type: 'bar',
         data: {
-            labels: ['Inorganic', 'Organic'],
+            labels: ['Organic', 'Inorganic', 'Recyclable'],
             datasets: [{
-                data: [0, 0],
-                backgroundColor: ['#00ff00', '#ff6600'],
+                data: [0, 0, 0],
+                backgroundColor: ['#FF6600', '#808080', '#00FF00'],
                 borderRadius: 5
             }]
         },
@@ -82,15 +99,15 @@ function initializeCharts() {
         }
     });
 
-    // Pie Chart for Material Breakdown
+    // Pie Chart for Category Breakdown
     const pieCtx = document.getElementById('pieChart').getContext('2d');
     pieChart = new Chart(pieCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Bottle', 'Can', 'Bag', 'Banana Peel', 'Eggshell', 'Leaves'],
+            labels: ['Organic', 'Inorganic', 'Recyclable'],
             datasets: [{
-                data: [0, 0, 0, 0, 0, 0],
-                backgroundColor: ['#22c55e', '#3b82f6', '#06b6d4', '#f97316', '#eab308', '#84cc16']
+                data: [0, 0, 0],
+                backgroundColor: ['#FF6600', '#808080', '#00FF00']
             }]
         },
         options: {
@@ -352,6 +369,16 @@ function displayImage(file) {
 }
 
 /**
+ * Filter detections by category
+ */
+function filterDetectionsByCategory(detections) {
+    return detections.filter(d => {
+        const category = d.category.toLowerCase();
+        return categoryFilters[category];
+    });
+}
+
+/**
  * Draw image with filtered bounding boxes on canvas
  */
 function drawImageWithDetections(img, detections) {
@@ -378,14 +405,14 @@ function drawImageWithDetections(img, detections) {
     // Draw the original image on canvas
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     
-    // Filter and draw bounding boxes
-    const filteredDetections = detections.filter(d => classFilters[d.class_name]);
+    // Filter by category and draw bounding boxes
+    const filteredDetections = filterDetectionsByCategory(detections);
     filteredDetections.forEach(det => drawBoundingBox(ctx, det));
     
     // Hide the img element since we're using canvas
     img.style.display = 'none';
     
-    console.log(`Drew ${filteredDetections.length}/${detections.length} detections (filtered by class)`);
+    console.log(`Drew ${filteredDetections.length}/${detections.length} detections (filtered by category)`);
 }
 
 function displayVideo(file) {
@@ -623,9 +650,9 @@ async function processVideo() {
         // Always draw the current video frame on canvas
         ctx.drawImage(videoDisplay, 0, 0, canvas.width, canvas.height);
         
-        // Draw last known detections
+        // Draw last known detections filtered by category
         if (lastDetections.length > 0) {
-            const filteredDetections = lastDetections.filter(d => classFilters[d.class_name]);
+            const filteredDetections = filterDetectionsByCategory(lastDetections);
             filteredDetections.forEach(det => drawBoundingBox(ctx, det));
         }
         
@@ -719,9 +746,9 @@ async function processCameraStream() {
         // Always draw the current camera frame on canvas
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        // Always draw last known detections on top
+        // Always draw last known detections on top filtered by category
         if (lastDetections.length > 0) {
-            const filteredDetections = lastDetections.filter(d => classFilters[d.class_name]);
+            const filteredDetections = filterDetectionsByCategory(lastDetections);
             filteredDetections.forEach(det => drawBoundingBox(ctx, det));
         }
         
@@ -795,12 +822,12 @@ function drawDetectionsOnImage(detections, img) {
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    const filteredDetections = detections.filter(d => classFilters[d.class_name]);
+    const filteredDetections = filterDetectionsByCategory(detections);
     filteredDetections.forEach(det => drawBoundingBox(ctx, det));
 }
 
 function drawDetectionsOnCanvas(detections, ctx, width, height) {
-    const filteredDetections = detections.filter(d => classFilters[d.class_name]);
+    const filteredDetections = filterDetectionsByCategory(detections);
     filteredDetections.forEach(det => drawBoundingBox(ctx, det));
 }
 
@@ -808,8 +835,14 @@ function drawBoundingBox(ctx, detection) {
     const { bbox, class_name, confidence, category } = detection;
     const { x1, y1, x2, y2 } = bbox;
     
-    // Set color based on category
-    const color = category === 'Inorganic' ? '#00ff00' : '#ff6600';
+    // Set color based on category (Organic, Inorganic, Recyclable)
+    let color;
+    switch(category.toLowerCase()) {
+        case 'organic': color = '#FF6600'; break;      // Orange
+        case 'inorganic': color = '#808080'; break;    // Gray
+        case 'recyclable': color = '#00FF00'; break;   // Green
+        default: color = '#FFFFFF';
+    }
     
     // Draw box
     ctx.strokeStyle = color;
@@ -817,7 +850,8 @@ function drawBoundingBox(ctx, detection) {
     ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
     
     // Draw label background
-    const label = `${class_name.replace('_', ' ')} (${category}) ${Math.round(confidence * 100)}%`;
+    const displayName = class_name.replace(/_/g, ' ').replace(/-/g, ' ');
+    const label = `${displayName} (${category}) ${Math.round(confidence * 100)}%`;
     ctx.font = 'bold 14px Arial';
     const textWidth = ctx.measureText(label).width;
     
@@ -842,6 +876,9 @@ function handleSortingDecision(decision) {
             break;
         case 'RED':
             decisionText = 'ORGANIC STREAM';
+            break;
+        case 'BLUE':
+            decisionText = 'RECYCLABLE STREAM';
             break;
         case 'MIXED':
             decisionText = 'SEPARATE STREAMS';
@@ -868,24 +905,31 @@ function updateSortingDecision(decision) {
 }
 
 function updateSortingSignal(signal) {
-    const greenLight = document.getElementById('signalGreen');
-    const redLight = document.getElementById('signalRed');
+    const organicLight = document.getElementById('signalOrganic');
+    const inorganicLight = document.getElementById('signalInorganic');
+    const recyclableLight = document.getElementById('signalRecyclable');
     
-    if (!greenLight || !redLight) return;
+    if (!organicLight || !inorganicLight || !recyclableLight) return;
     
-    greenLight.classList.remove('active');
-    redLight.classList.remove('active');
+    // Reset all lights
+    organicLight.classList.remove('active');
+    inorganicLight.classList.remove('active');
+    recyclableLight.classList.remove('active');
     
     switch(signal) {
-        case 'GREEN':
-            greenLight.classList.add('active');
-            break;
         case 'RED':
-            redLight.classList.add('active');
+            organicLight.classList.add('active');
+            break;
+        case 'GREEN':
+            inorganicLight.classList.add('active');
+            break;
+        case 'BLUE':
+            recyclableLight.classList.add('active');
             break;
         case 'MIXED':
-            greenLight.classList.add('active');
-            redLight.classList.add('active');
+            organicLight.classList.add('active');
+            inorganicLight.classList.add('active');
+            recyclableLight.classList.add('active');
             break;
     }
 }
@@ -894,40 +938,35 @@ function updateSortingSignal(signal) {
 
 function updateStats(detections) {
     detections.forEach(det => {
-        if (!classFilters[det.class_name]) return;
+        const category = det.category.toLowerCase();
+        if (!categoryFilters[category]) return;
         
         stats.total++;
-        if (stats.byClass[det.class_name] !== undefined) {
-            stats.byClass[det.class_name]++;
-        }
         
-        if (det.category === 'Inorganic') {
-            stats.inorganic++;
-        } else {
+        // Update category counts
+        if (category === 'organic') {
             stats.organic++;
+        } else if (category === 'inorganic') {
+            stats.inorganic++;
+        } else if (category === 'recyclable') {
+            stats.recyclable++;
         }
     });
     
     // Update UI
     document.getElementById('totalItems').textContent = stats.total;
-    document.getElementById('inorganicCount').textContent = stats.inorganic;
     document.getElementById('organicCount').textContent = stats.organic;
+    document.getElementById('inorganicCount').textContent = stats.inorganic;
+    document.getElementById('recyclableCount').textContent = stats.recyclable;
     
     // Update charts
     if (statsChart) {
-        statsChart.data.datasets[0].data = [stats.inorganic, stats.organic];
+        statsChart.data.datasets[0].data = [stats.organic, stats.inorganic, stats.recyclable];
         statsChart.update('none');
     }
     
     if (pieChart) {
-        pieChart.data.datasets[0].data = [
-            stats.byClass.bottle,
-            stats.byClass.can,
-            stats.byClass.bag,
-            stats.byClass.banana_peel,
-            stats.byClass.eggshell,
-            stats.byClass.leaves
-        ];
+        pieChart.data.datasets[0].data = [stats.organic, stats.inorganic, stats.recyclable];
         pieChart.update('none');
     }
 }
@@ -939,7 +978,8 @@ function addToLog(detections) {
     const timestamp = now.toLocaleString('vi-VN');
     
     detections.forEach(det => {
-        if (!classFilters[det.class_name]) return;
+        const category = det.category.toLowerCase();
+        if (!categoryFilters[category]) return;
         
         const log = {
             timestamp,
@@ -976,12 +1016,15 @@ function renderLogs() {
         return;
     }
     
-    logTable.innerHTML = filteredLogs.slice(0, 50).map(log => `
-        <div class="log-entry">
-            <span class="log-time">${log.timestamp}</span>
-            <span class="log-class ${log.category.toLowerCase()}">${log.class_name.replace('_', ' ')} (${log.category})</span>
-        </div>
-    `).join('');
+    logTable.innerHTML = filteredLogs.slice(0, 50).map(log => {
+        const displayName = log.class_name.replace(/_/g, ' ').replace(/-/g, ' ');
+        return `
+            <div class="log-entry">
+                <span class="log-time">${log.timestamp}</span>
+                <span class="log-class ${log.category.toLowerCase()}">${displayName} (${log.category})</span>
+            </div>
+        `;
+    }).join('');
 }
 
 function filterLogs() {
@@ -995,10 +1038,10 @@ function updateConfidence(value) {
     document.getElementById('confidenceValue').textContent = confidenceThreshold.toFixed(2);
 }
 
-function updateClassFilter() {
-    const checkboxes = document.querySelectorAll('.class-filters input[type="checkbox"]');
+function updateCategoryFilter() {
+    const checkboxes = document.querySelectorAll('.category-filters input[type="checkbox"]');
     checkboxes.forEach(cb => {
-        classFilters[cb.dataset.class] = cb.checked;
+        categoryFilters[cb.dataset.category] = cb.checked;
     });
     
     // Only re-draw if we're in image mode and have detections
@@ -1016,7 +1059,7 @@ function updateClassFilter() {
     }
     // For video/camera, the filter is applied in real-time during processing
     
-    console.log('Class filters updated:', classFilters);
+    console.log('Category filters updated:', categoryFilters);
 }
 
 // ==================== SNAPSHOT ====================

@@ -421,6 +421,14 @@ body {
     background: var(--accent-orange);
 }
 
+.checkmark.recyclable {
+    border-color: var(--accent-blue);
+}
+
+.checkbox-label input:checked + .checkmark.recyclable {
+    background: var(--accent-blue);
+}
+
 .checkbox-label input:checked + .checkmark::after {
     content: '✓';
     color: #000;
@@ -542,6 +550,10 @@ body {
     color: var(--accent-orange);
 }
 
+.stat-item.recyclable .stat-value {
+    color: var(--accent-blue);
+}
+
 .stat-label {
     font-size: 0.75rem;
     color: var(--text-secondary);
@@ -576,8 +588,7 @@ body {
 
 .dot.inorganic { background: var(--accent-green); }
 .dot.organic { background: var(--accent-orange); }
-.dot.material { background: var(--accent-blue); }
-.dot.other { background: #888; }
+.dot.recyclable { background: var(--accent-blue); }
 
 /* ============== Detection Log ============== */
 .logs-section {
@@ -650,6 +661,10 @@ body {
     color: var(--accent-orange);
 }
 
+.log-class.recyclable {
+    color: var(--accent-blue);
+}
+
 .log-placeholder {
     text-align: center;
     padding: 1rem;
@@ -690,6 +705,10 @@ body {
 
 .signal-light.red {
     color: var(--accent-orange);
+}
+
+.signal-light.blue {
+    color: var(--accent-blue);
 }
 
 .signal-light.active {

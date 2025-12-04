@@ -6,7 +6,7 @@ from pathlib import Path
 
 # Base paths
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-MODEL_PATH = BASE_DIR / "runs" / "exp3_final_p100" / "weights" / "best.pt"
+MODEL_PATH = BASE_DIR / "runs" / "yolov8n_waste" / "weights" / "best.pt"
 FALLBACK_MODEL_PATH = BASE_DIR / "yolov8n.pt"
 
 # Model settings
@@ -14,40 +14,88 @@ CONFIDENCE_THRESHOLD = 0.5
 IOU_THRESHOLD = 0.45
 IMG_SIZE = 640
 
-# Class names mapping (from data_kaggle.yaml)
+# ========== 39 CLASSES MAPPING ==========
+# Class names mapping (from data_final)
 CLASS_NAMES = {
-    0: "bag",
-    1: "banana_peel", 
-    2: "bottle",
-    3: "can",
-    4: "eggshell",
-    5: "leaves"
+    # Organic Waste (0-31) - 32 classes
+    0: "Apple", 1: "Apple-core", 2: "Apple-peel", 3: "Bone", 4: "Bone-fish",
+    5: "Bread", 6: "Bun", 7: "Egg-hard", 8: "Egg-scramble", 9: "Egg-shell",
+    10: "Egg-steam", 11: "Egg-yolk", 12: "Fish", 13: "Meat", 14: "Mussel",
+    15: "Mussel-shell", 16: "Noodle", 17: "Orange", 18: "Orange-peel",
+    19: "Other-waste", 20: "Pancake", 21: "Pasta", 22: "Pear", 23: "Pear-core",
+    24: "Pear-peel", 25: "Potato", 26: "Rice", 27: "Shrimp", 28: "Shrimp-shell",
+    29: "Tofu", 30: "Tomato", 31: "Vegetable",
+    # Inorganic (32-33) - 2 classes
+    32: "plastic_bag", 33: "styrofoam",
+    # Recyclable (34-38) - 5 classes
+    34: "Cardboard", 35: "Glass", 36: "Metal", 37: "Paper", 38: "Plastic"
 }
 
 # Vietnamese class names
 CLASS_NAMES_VI = {
-    "bag": "Túi",
-    "banana_peel": "Vỏ chuối",
-    "bottle": "Chai",
-    "can": "Lon",
-    "eggshell": "Vỏ trứng",
-    "leaves": "Lá cây"
+    # Organic
+    "Apple": "Táo", "Apple-core": "Lõi táo", "Apple-peel": "Vỏ táo",
+    "Bone": "Xương", "Bone-fish": "Xương cá", "Bread": "Bánh mì", "Bun": "Bánh bao",
+    "Egg-hard": "Trứng luộc", "Egg-scramble": "Trứng chiên", "Egg-shell": "Vỏ trứng",
+    "Egg-steam": "Trứng hấp", "Egg-yolk": "Lòng đỏ trứng", "Fish": "Cá", "Meat": "Thịt",
+    "Mussel": "Trai", "Mussel-shell": "Vỏ trai", "Noodle": "Mì", "Orange": "Cam",
+    "Orange-peel": "Vỏ cam", "Other-waste": "Rác khác", "Pancake": "Bánh kếp",
+    "Pasta": "Mì ống", "Pear": "Lê", "Pear-core": "Lõi lê", "Pear-peel": "Vỏ lê",
+    "Potato": "Khoai tây", "Rice": "Cơm", "Shrimp": "Tôm", "Shrimp-shell": "Vỏ tôm",
+    "Tofu": "Đậu hũ", "Tomato": "Cà chua", "Vegetable": "Rau củ",
+    # Inorganic
+    "plastic_bag": "Túi nhựa", "styrofoam": "Xốp",
+    # Recyclable
+    "Cardboard": "Bìa carton", "Glass": "Thủy tinh", "Metal": "Kim loại",
+    "Paper": "Giấy", "Plastic": "Nhựa"
 }
 
-# Category mapping (Business Logic)
-INORGANIC_CLASSES = ["bag", "bottle", "can"]
-ORGANIC_CLASSES = ["banana_peel", "eggshell", "leaves"]
+# ========== CATEGORY MAPPING (3 CATEGORIES) ==========
+# Organic classes (Hữu cơ) - index 0-31
+ORGANIC_CLASSES = [
+    "Apple", "Apple-core", "Apple-peel", "Bone", "Bone-fish", "Bread", "Bun",
+    "Egg-hard", "Egg-scramble", "Egg-shell", "Egg-steam", "Egg-yolk", "Fish",
+    "Meat", "Mussel", "Mussel-shell", "Noodle", "Orange", "Orange-peel",
+    "Other-waste", "Pancake", "Pasta", "Pear", "Pear-core", "Pear-peel",
+    "Potato", "Rice", "Shrimp", "Shrimp-shell", "Tofu", "Tomato", "Vegetable"
+]
+
+# Inorganic classes (Vô cơ) - index 32-33
+INORGANIC_CLASSES = ["plastic_bag", "styrofoam"]
+
+# Recyclable classes (Tái chế) - index 34-38
+RECYCLABLE_CLASSES = ["Cardboard", "Glass", "Metal", "Paper", "Plastic"]
+
+# Function to get category from class name
+def get_category(class_name):
+    """Get category (organic/inorganic/recyclable) from class name"""
+    if class_name in ORGANIC_CLASSES:
+        return "organic"
+    elif class_name in INORGANIC_CLASSES:
+        return "inorganic"
+    elif class_name in RECYCLABLE_CLASSES:
+        return "recyclable"
+    return "unknown"
 
 # Color coding for visualization (BGR format for OpenCV)
 COLORS = {
-    "inorganic": (0, 255, 0),   # Green
-    "organic": (0, 165, 255),    # Orange
+    "organic": (0, 165, 255),      # Orange
+    "inorganic": (128, 128, 128),  # Gray
+    "recyclable": (0, 255, 0),     # Green
 }
 
-# Color coding for web (RGB format)
+# Color coding for web (RGB/Hex format)
 WEB_COLORS = {
-    "inorganic": "#00FF00",  # Green
-    "organic": "#FF6600",     # Orange
+    "organic": "#FF6600",      # Orange
+    "inorganic": "#808080",    # Gray
+    "recyclable": "#00FF00",   # Green
+}
+
+# Category Vietnamese names
+CATEGORY_NAMES_VI = {
+    "organic": "Hữu cơ",
+    "inorganic": "Vô cơ", 
+    "recyclable": "Tái chế"
 }
 
 # Logs directory
