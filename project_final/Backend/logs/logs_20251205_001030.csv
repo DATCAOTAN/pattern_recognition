@@ -1,0 +1,4 @@
+ID,Timestamp,Class,Category,Confidence
+1,2025-12-05 00:11:25,Cardboard,Recyclable,0.75
+2,2025-12-05 00:11:27,Cardboard,Recyclable,0.75
+3,2025-12-05 00:11:38,Cardboard,Recyclable,0.7

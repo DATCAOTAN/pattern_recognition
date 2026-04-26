@@ -1,0 +1,68 @@
+# EcoSort AI - Merged Dataset (39 Classes)
+# All original classes preserved for detailed detection
+# Category classification handled by backend/frontend
+
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 39
+names:
+  - 'Apple'
+  - 'Apple-core'
+  - 'Apple-peel'
+  - 'Bone'
+  - 'Bone-fish'
+  - 'Bread'
+  - 'Bun'
+  - 'Egg-hard'
+  - 'Egg-scramble'
+  - 'Egg-shell'
+  - 'Egg-steam'
+  - 'Egg-yolk'
+  - 'Fish'
+  - 'Meat'
+  - 'Mussel'
+  - 'Mussel-shell'
+  - 'Noodle'
+  - 'Orange'
+  - 'Orange-peel'
+  - 'Other-waste'
+  - 'Pancake'
+  - 'Pasta'
+  - 'Pear'
+  - 'Pear-core'
+  - 'Pear-peel'
+  - 'Potato'
+  - 'Rice'
+  - 'Shrimp'
+  - 'Shrimp-shell'
+  - 'Tofu'
+  - 'Tomato'
+  - 'Vegetable'
+  - 'plastic_bag'
+  - 'styrofoam'
+  - 'Cardboard'
+  - 'Glass'
+  - 'Metal'
+  - 'Paper'
+  - 'Plastic'
+
+# ========== CLASS MAPPING FOR BACKEND/FRONTEND ==========
+# ORGANIC (Hữu cơ) - Classes 0-31:
+#   Apple, Apple-core, Apple-peel, Bone, Bone-fish, Bread, Bun,
+#   Egg-hard, Egg-scramble, Egg-shell, Egg-steam, Egg-yolk, Fish,
+#   Meat, Mussel, Mussel-shell, Noodle, Orange, Orange-peel,
+#   Other-waste, Pancake, Pasta, Pear, Pear-core, Pear-peel,
+#   Potato, Rice, Shrimp, Shrimp-shell, Tofu, Tomato, Vegetable
+#
+# INORGANIC (Vô cơ) - Classes 32-33:
+#   32: plastic_bag
+#   33: styrofoam
+#
+# RECYCLABLE (Tái chế) - Classes 34-38:
+#   34: Cardboard
+#   35: Glass
+#   36: Metal
+#   37: Paper
+#   38: Plastic

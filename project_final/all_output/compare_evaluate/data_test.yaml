@@ -1,0 +1,47 @@
+# Waste Classification Dataset - Test Set
+path: /kaggle/input/waste-organic-inorganic-reclycable-yolov8/Final_dataset
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 39
+names:
+  0: Apple
+  1: Apple-core
+  2: Apple-peel
+  3: Bone
+  4: Bone-fish
+  5: Bread
+  6: Bun
+  7: Egg-hard
+  8: Egg-scramble
+  9: Egg-shell
+  10: Egg-steam
+  11: Egg-yolk
+  12: Fish
+  13: Meat
+  14: Mussel
+  15: Mussel-shell
+  16: Noodle
+  17: Orange
+  18: Orange-peel
+  19: Other-waste
+  20: Pancake
+  21: Pasta
+  22: Pear
+  23: Pear-core
+  24: Pear-peel
+  25: Potato
+  26: Rice
+  27: Shrimp
+  28: Shrimp-shell
+  29: Tofu
+  30: Tomato
+  31: Vegetable
+  32: plastic_bag
+  33: styrofoam
+  34: Cardboard
+  35: Glass
+  36: Metal
+  37: Paper
+  38: Plastic

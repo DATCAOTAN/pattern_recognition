@@ -1,0 +1,13 @@
+ID,Timestamp,Class,Category,Confidence
+1,2025-12-03 18:12:02,Paper,Recyclable,0.62
+2,2025-12-03 18:12:02,Plastic,Recyclable,0.55
+3,2025-12-03 18:12:11,Paper,Recyclable,0.62
+4,2025-12-03 18:12:11,Plastic,Recyclable,0.55
+5,2025-12-03 18:12:11,Pear,Organic,0.48
+6,2025-12-03 18:12:11,Apple,Organic,0.3
+7,2025-12-03 18:12:14,Paper,Recyclable,0.62
+8,2025-12-03 18:12:14,Plastic,Recyclable,0.55
+9,2025-12-03 18:12:14,Pear,Organic,0.48
+10,2025-12-03 18:12:16,Paper,Recyclable,0.62
+11,2025-12-03 18:12:19,Paper,Recyclable,0.62
+12,2025-12-03 18:12:19,Plastic,Recyclable,0.55
