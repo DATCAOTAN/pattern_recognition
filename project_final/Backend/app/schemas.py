@@ -28,9 +28,10 @@ class Detection(BaseModel):
 class SortingDecision(BaseModel):
     """Sorting decision for detected items"""
     decision: str
-    signal: str  # GREEN, RED, MIXED, IDLE
-    inorganic_count: int
+    signal: str  # GREEN, RED, MIXED, IDLE, BLUE
     organic_count: int
+    inorganic_count: int
+    recyclable_count: int
     total_count: int
 
 
@@ -73,11 +74,13 @@ class LogsResponse(BaseModel):
 class StatisticsResponse(BaseModel):
     """Response for statistics endpoint"""
     total_detections: int
-    inorganic_count: int
     organic_count: int
+    inorganic_count: int
+    recyclable_count: int
     class_counts: Dict[str, int]
-    inorganic_percentage: float
     organic_percentage: float
+    inorganic_percentage: float
+    recyclable_percentage: float
     session_id: str
 
 

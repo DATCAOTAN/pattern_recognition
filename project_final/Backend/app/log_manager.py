@@ -126,15 +126,19 @@ class LogManager:
         if not self.logs:
             return {
                 "total_detections": 0,
-                "inorganic_count": 0,
                 "organic_count": 0,
+                "inorganic_count": 0,
+                "recyclable_count": 0,
                 "class_counts": {},
+                "organic_percentage": 0,
                 "inorganic_percentage": 0,
-                "organic_percentage": 0
+                "recyclable_percentage": 0,
+                "session_id": self.session_id
             }
         
-        inorganic_count = sum(1 for l in self.logs if l["category"] == "Inorganic")
         organic_count = sum(1 for l in self.logs if l["category"] == "Organic")
+        inorganic_count = sum(1 for l in self.logs if l["category"] == "Inorganic")
+        recyclable_count = sum(1 for l in self.logs if l["category"] == "Recyclable")
         total = len(self.logs)
         
         # Count by class
@@ -145,11 +149,13 @@ class LogManager:
         
         return {
             "total_detections": total,
-            "inorganic_count": inorganic_count,
             "organic_count": organic_count,
+            "inorganic_count": inorganic_count,
+            "recyclable_count": recyclable_count,
             "class_counts": class_counts,
-            "inorganic_percentage": round(inorganic_count / total * 100, 1) if total > 0 else 0,
             "organic_percentage": round(organic_count / total * 100, 1) if total > 0 else 0,
+            "inorganic_percentage": round(inorganic_count / total * 100, 1) if total > 0 else 0,
+            "recyclable_percentage": round(recyclable_count / total * 100, 1) if total > 0 else 0,
             "session_id": self.session_id
         }
     
@@ -209,10 +215,12 @@ class LogManager:
         stats = self.get_statistics()
         stats_df = pd.DataFrame([{
             "Total Detections": stats["total_detections"],
-            "Inorganic Count": stats["inorganic_count"],
             "Organic Count": stats["organic_count"],
+            "Inorganic Count": stats["inorganic_count"],
+            "Recyclable Count": stats["recyclable_count"],
+            "Organic %": stats["organic_percentage"],
             "Inorganic %": stats["inorganic_percentage"],
-            "Organic %": stats["organic_percentage"]
+            "Recyclable %": stats["recyclable_percentage"]
         }])
         
         with pd.ExcelWriter(filepath, engine='openpyxl') as writer:

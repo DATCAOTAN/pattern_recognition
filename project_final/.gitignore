@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+*.pyc
+*.pyo
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# YOLO pretrained base weights (large files, re-downloadable)
+yolov8n.pt
+yolov8s.pt
+yolo11n.pt
+
+# Logs & Session data
+Backend/logs/*.csv
+Backend/logs/*.xlsx
+Backend/logs/*.json
+
+# Uploads & Snapshots (runtime generated)
+Backend/uploads/
+Backend/snapshots/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+notebook/.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temp files
+*.tmp
+*.bak
